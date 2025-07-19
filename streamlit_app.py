@@ -4,6 +4,9 @@ import json
 import os
 from datetime import datetime
 import re
+import subprocess
+import time
+import pandas as pd
 
 # Page configuration with stability improvements
 st.set_page_config(
@@ -78,6 +81,270 @@ def get_demo_data():
             "date": "2025-01-16"
         }
     ]
+
+# Function to start Node.js web app
+def start_node_webapp():
+    """Start the Node.js web application"""
+    try:
+        # Check if web-app.js exists
+        if not os.path.exists('web-app.js'):
+            return False, "web-app.js file not found"
+        
+        # Start the Node.js process
+        process = subprocess.Popen(['node', 'web-app.js'], 
+                                 stdout=subprocess.PIPE, 
+                                 stderr=subprocess.PIPE)
+        
+        # Give it a moment to start
+        time.sleep(2)
+        
+        # Check if it's running
+        poll = process.poll()
+        if poll is None:
+            return True, "Node.js web app started successfully"
+        else:
+            return False, "Failed to start Node.js web app"
+            
+    except Exception as e:
+        return False, f"Error starting Node.js web app: {str(e)}"
+
+# Function to get data from Google Sheets
+def get_sheets_data(spreadsheet_id, sheet_name="WEBSITE"):
+    """Get data from Google Sheets using CSV export"""
+    try:
+        # Multiple URL formats to try
+        urls = [
+            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export?format=csv&gid=0",
+            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export?format=csv",
+            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/gviz/tq?tqx=out:csv",
+            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/pub?output=csv"
+        ]
+        
+        for url in urls:
+            try:
+                response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (compatible; BlogGenerator/1.0)'})
+                if response.status_code == 200 and not response.text.startswith('<!DOCTYPE'):
+                    # Parse CSV data
+                    lines = response.text.strip().split('\n')
+                    if len(lines) > 1:
+                        # Convert to structured data
+                        headers = [h.strip('"') for h in lines[0].split(',')]
+                        data = []
+                        for line in lines[1:]:
+                            if line.strip():
+                                values = [v.strip('"') for v in line.split(',')]
+                                if len(values) >= len(headers):
+                                    row = {}
+                                    for i, header in enumerate(headers):
+                                        row[header] = values[i] if i < len(values) else ""
+                                    data.append(row)
+                        return True, data, f"Successfully loaded {len(data)} rows"
+            except Exception as e:
+                continue
+        
+        return False, [], "Could not access spreadsheet data"
+        
+    except Exception as e:
+        return False, [], f"Error: {str(e)}"
+
+# Function to test Cloudflare Workers connection
+def test_cloudflare_connection(api_token, account_id):
+    """Test Cloudflare Workers API connection"""
+    try:
+        headers = {
+            'Authorization': f'Bearer {api_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Test account access
+        response = requests.get(f"https://api.cloudflare.com/client/v4/accounts/{account_id}", headers=headers)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                return True, f"Connected to account: {data['result']['name']}"
+            else:
+                return False, f"API Error: {data.get('errors', [{}])[0].get('message', 'Unknown error')}"
+        else:
+            return False, f"HTTP Error {response.status_code}: {response.text}"
+            
+    except Exception as e:
+        return False, f"Connection error: {str(e)}"
+
+# Function to deploy website to Cloudflare Workers
+def deploy_to_workers(api_token, account_id, worker_name, html_content, spreadsheet_id):
+    """Deploy website to Cloudflare Workers"""
+    try:
+        headers = {
+            'Authorization': f'Bearer {api_token}',
+            'Content-Type': 'application/javascript'
+        }
+        
+        # Create worker script
+        worker_script = f"""
+addEventListener('fetch', event => {{
+  event.respondWith(handleRequest(event.request))
+}})
+
+async function handleRequest(request) {{
+  const url = new URL(request.url);
+  
+  if (url.pathname === '/api/data') {{
+    return await getSheetData();
+  }}
+  
+  // Serve the main website
+  return new Response(`{html_content}`, {{
+    headers: {{ 'content-type': 'text/html;charset=UTF-8' }}
+  }});
+}}
+
+async function getSheetData() {{
+  try {{
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export?format=csv&gid=0';
+    const response = await fetch(sheetUrl);
+    const csvData = await response.text();
+    
+    return new Response(csvData, {{
+      headers: {{ 'content-type': 'text/csv' }}
+    }});
+  }} catch (error) {{
+    return new Response(JSON.stringify({{error: error.message}}), {{
+      headers: {{ 'content-type': 'application/json' }}
+    }});
+  }}
+}}
+"""
+        
+        # Deploy to Cloudflare Workers
+        deploy_url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/workers/scripts/{worker_name}"
+        
+        response = requests.put(deploy_url, headers=headers, data=worker_script)
+        
+        if response.status_code in [200, 201]:
+            # Get the worker URL
+            worker_url = f"https://{worker_name}.{account_id}.workers.dev"
+            return True, f"Successfully deployed to: {worker_url}"
+        else:
+            error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text
+            return False, f"Deployment failed: {error_data}"
+            
+    except Exception as e:
+        return False, f"Deployment error: {str(e)}"
+
+# Function to generate simple website HTML
+def generate_website_html(title, description, data, color_scheme="blue"):
+    """Generate HTML for simple website based on spreadsheet data"""
+    
+    color_schemes = {
+        "blue": {"primary": "#2563eb", "secondary": "#3b82f6", "background": "#eff6ff"},
+        "green": {"primary": "#059669", "secondary": "#10b981", "background": "#ecfdf5"},
+        "purple": {"primary": "#7c3aed", "secondary": "#8b5cf6", "background": "#f3e8ff"},
+        "red": {"primary": "#dc2626", "secondary": "#ef4444", "background": "#fef2f2"}
+    }
+    
+    colors = color_schemes.get(color_scheme, color_schemes["blue"])
+    
+    # Generate content based on data
+    content_html = ""
+    if data:
+        for item in data[:10]:  # Limit to first 10 items
+            item_title = item.get('title', item.get('name', item.get('item', 'No Title')))
+            item_description = item.get('description', item.get('content', item.get('details', 'No description available')))
+            item_category = item.get('category', item.get('type', 'General'))
+            
+            content_html += f"""
+            <div class="content-item">
+                <h3>{item_title}</h3>
+                <span class="category">{item_category}</span>
+                <p>{item_description}</p>
+            </div>
+            """
+    else:
+        content_html = "<div class='content-item'><h3>No data available</h3><p>Please check your spreadsheet connection.</p></div>"
+    
+    html_template = f"""
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            background: {colors['background']}; 
+        }}
+        .container {{ max-width: 1000px; margin: 0 auto; padding: 20px; }}
+        .header {{ 
+            text-align: center; 
+            margin-bottom: 40px; 
+            padding: 40px 20px; 
+            background: {colors['primary']}; 
+            color: white; 
+            border-radius: 12px; 
+        }}
+        .header h1 {{ font-size: 2.5rem; margin-bottom: 10px; }}
+        .header p {{ font-size: 1.2rem; opacity: 0.9; }}
+        .content {{ display: grid; gap: 20px; }}
+        .content-item {{ 
+            background: white; 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            border-left: 4px solid {colors['primary']}; 
+        }}
+        .content-item h3 {{ color: {colors['primary']}; margin-bottom: 10px; }}
+        .category {{ 
+            background: {colors['secondary']}; 
+            color: white; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            margin-bottom: 15px; 
+            display: inline-block; 
+        }}
+        .content-item p {{ color: #555; }}
+        .footer {{ 
+            text-align: center; 
+            margin-top: 40px; 
+            padding: 20px; 
+            color: #666; 
+        }}
+        @media (max-width: 768px) {{
+            .header h1 {{ font-size: 2rem; }}
+            .container {{ padding: 15px; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{title}</h1>
+            <p>{description}</p>
+        </div>
+        <div class="content">
+            {content_html}
+        </div>
+        <div class="footer">
+            <p>Powered by Google Sheets & Cloudflare Workers</p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-refresh data every 5 minutes
+        setInterval(function() {{
+            location.reload();
+        }}, 300000);
+    </script>
+</body>
+</html>
+"""
+    
+    return html_template
 
 def calculate_stats(data):
     """Calculate statistics from data"""
@@ -244,6 +511,25 @@ tab1, tab2, tab3, tab4 = st.tabs(["🏠 Dashboard", "📝 Template Generator", "
 
 with tab1:
     st.header("📊 Dashboard")
+    
+    # Node.js Web App Integration
+    st.markdown("### 🌐 Node.js Web Application")
+    col_node1, col_node2 = st.columns(2)
+    
+    with col_node1:
+        if st.button("🚀 Start Node.js Web App", key="start_node"):
+            success, message = start_node_webapp()
+            if success:
+                st.success(f"✅ {message}")
+                st.info("🌐 Node.js web app is running at: http://localhost:5000")
+                st.markdown("[Open Web App](http://localhost:5000)", unsafe_allow_html=True)
+            else:
+                st.error(f"❌ {message}")
+    
+    with col_node2:
+        st.info("💡 The Node.js web app provides additional features:\n- Advanced template generation\n- Real-time data preview\n- Direct Cloudflare deployment")
+    
+    st.divider()
     
     col1, col2 = st.columns(2)
     
@@ -456,29 +742,159 @@ with tab2:
         """, unsafe_allow_html=True)
 
 with tab3:
-    st.header("🚀 Deployment")
+    st.header("🚀 Website Deployment")
     
-    col1, col2 = st.columns(2)
+    # Website Generation Section
+    st.markdown("### 🌐 Generate Website from Spreadsheet")
+    
+    col_gen1, col_gen2 = st.columns(2)
+    
+    with col_gen1:
+        st.markdown("#### Website Configuration")
+        website_title = st.text_input("Website Title", value=blog_title, help="Title for your website")
+        website_description = st.text_area("Website Description", value=blog_description, help="Description for your website")
+        website_color = st.selectbox("Color Scheme", ["blue", "green", "purple", "red"], help="Choose website color scheme")
+        
+        if st.button("🎨 Generate Website from Spreadsheet Data", type="primary"):
+            if not spreadsheet_id:
+                st.error("Please provide Spreadsheet ID in the sidebar")
+            else:
+                with st.spinner("Loading data from spreadsheet..."):
+                    success, data, message = get_sheets_data(spreadsheet_id, sheet_name)
+                    
+                if success and data:
+                    st.success(f"✅ {message}")
+                    
+                    # Generate website HTML with real data
+                    website_html = generate_website_html(website_title, website_description, data, website_color)
+                    
+                    # Save generated website
+                    try:
+                        with open('generated_website.html', 'w', encoding='utf-8') as f:
+                            f.write(website_html)
+                        
+                        # Save to session state
+                        st.session_state.generated_website = website_html
+                        st.session_state.website_data = data
+                        
+                        st.success("✅ Website generated successfully!")
+                        
+                        # Show preview
+                        with st.expander("🖥️ Website Preview", expanded=True):
+                            st.markdown("**Data loaded from spreadsheet:**")
+                            df = pd.DataFrame(data[:5])  # Show first 5 rows
+                            st.dataframe(df)
+                            
+                        # Download button
+                        st.download_button(
+                            label="📥 Download Website HTML",
+                            data=website_html,
+                            file_name="website.html",
+                            mime="text/html"
+                        )
+                        
+                    except Exception as e:
+                        st.error(f"Error saving website: {str(e)}")
+                        st.session_state.generated_website = website_html
+                        st.session_state.website_data = data
+                        st.success("✅ Website generated (using session backup)")
+                else:
+                    st.error(f"❌ {message}")
+    
+    with col_gen2:
+        st.markdown("#### Cloudflare Workers Deployment")
+        
+        if 'generated_website' in st.session_state or os.path.exists('generated_website.html'):
+            st.success("✅ Website ready for deployment!")
+            
+            worker_name = st.text_input("Worker Name", value=f"{website_title.lower().replace(' ', '-')}-{datetime.now().strftime('%m%d')}", help="Name for your Cloudflare Worker")
+            
+            if st.button("🚀 Deploy to Cloudflare Workers", type="primary"):
+                if not cf_api_token or not cf_account_id:
+                    st.error("Please provide Cloudflare credentials in the sidebar")
+                else:
+                    # Test connection first
+                    with st.spinner("Testing Cloudflare connection..."):
+                        cf_success, cf_message = test_cloudflare_connection(cf_api_token, cf_account_id)
+                    
+                    if cf_success:
+                        st.success(f"✅ {cf_message}")
+                        
+                        # Get website HTML
+                        website_html = st.session_state.get('generated_website')
+                        if not website_html and os.path.exists('generated_website.html'):
+                            with open('generated_website.html', 'r', encoding='utf-8') as f:
+                                website_html = f.read()
+                        
+                        if website_html:
+                            with st.spinner("Deploying to Cloudflare Workers..."):
+                                deploy_success, deploy_message = deploy_to_workers(
+                                    cf_api_token, cf_account_id, worker_name, 
+                                    website_html, spreadsheet_id
+                                )
+                            
+                            if deploy_success:
+                                st.success(f"✅ {deploy_message}")
+                                
+                                # Save deployment info
+                                deployment_info = {
+                                    'url': deploy_message.split(': ')[1] if ': ' in deploy_message else deploy_message,
+                                    'worker_name': worker_name,
+                                    'deployed_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                    'spreadsheet_id': spreadsheet_id
+                                }
+                                st.session_state.last_deployment = deployment_info
+                                
+                                # Show direct link
+                                if 'http' in deploy_message:
+                                    url = deploy_message.split(': ')[1]
+                                    st.markdown(f"### 🔗 [Open Your Website]({url})")
+                                    st.info(f"Your website is live at: {url}")
+                            else:
+                                st.error(f"❌ {deploy_message}")
+                        else:
+                            st.error("No website HTML found to deploy")
+                    else:
+                        st.error(f"❌ {cf_message}")
+        else:
+            st.warning("⚠️ Generate a website first before deploying")
+    
+    st.divider()
     
     with col1:
-        st.markdown("### 🔧 Manual Deploy")
-        st.markdown("""
-        <div class="info-box">
-            <h4>Manual Deployment Steps:</h4>
-            <ol>
-                <li>Generate your HTML template</li>
-                <li>Download the template file</li>
-                <li>Upload to your web server</li>
-                <li>Configure environment variables</li>
-                <li>Test the deployment</li>
-            </ol>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("### 📊 Data Preview from Spreadsheet")
         
-        if st.button("📋 Generate Deployment Guide"):
-            deployment_guide = generate_deployment_guide()
-            st.markdown("### 📖 Deployment Guide")
-            st.markdown(deployment_guide)
+        if st.button("📄 Load Spreadsheet Data"):
+            if not spreadsheet_id:
+                st.error("Please provide Spreadsheet ID in the sidebar")
+            else:
+                with st.spinner("Loading data from spreadsheet..."):
+                    success, data, message = get_sheets_data(spreadsheet_id, sheet_name)
+                
+                if success and data:
+                    st.success(f"✅ {message}")
+                    
+                    # Display data preview
+                    df = pd.DataFrame(data)
+                    st.dataframe(df, use_container_width=True)
+                    
+                    # Show column information
+                    st.markdown("**Available Columns:**")
+                    for col in df.columns:
+                        st.write(f"- {col}")
+                        
+                    # Save data to session for later use
+                    st.session_state.spreadsheet_data = data
+                else:
+                    st.error(f"❌ {message}")
+        
+        # Show saved data if available
+        if 'spreadsheet_data' in st.session_state:
+            st.markdown("### 📋 Loaded Data Summary")
+            data = st.session_state.spreadsheet_data
+            st.info(f"Total rows: {len(data)}")
+            if data:
+                st.info(f"Columns: {', '.join(data[0].keys())}")
     
     with col2:
         st.markdown("### ☁️ Cloudflare Workers Deploy")
