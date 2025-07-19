@@ -1,0 +1,9 @@
+{
+  "type": "Blog Homepage",
+  "blog_title": "Test Blog",
+  "blog_description": "Test blog untuk testing deployment",
+  "blog_keywords": "test, blog, deployment",
+  "color_scheme": "Blue",
+  "layout_style": "Modern",
+  "posts_per_page": 6
+}

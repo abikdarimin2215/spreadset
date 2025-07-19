@@ -1,0 +1,12 @@
+{
+  "cf_api_token": "xEPsMIeIGMaB46ryg2PmyQfyaUNErRL8vPmKXf6m",
+  "cf_account_id": "a9f23a2cc52c24bcf5653631fcf6775b",
+  "spreadsheet_id": "14K69q8SMd3pCAROB1YQMDrmuw8y6QphxAslF_y-3NrM",
+  "sheet_name": "WEBSITE",
+  "blog_title": "Blog Sederhana",
+  "blog_description": "Platform blog yang terhubung dengan Google Sheets",
+  "blog_keywords": "blog, artikel, google sheets",
+  "posts_per_page": 6,
+  "worker_name_prefix": "blog",
+  "auto_generate_name": true
+}

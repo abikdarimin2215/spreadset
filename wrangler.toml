@@ -1,0 +1,69 @@
+# Cloudflare Workers Configuration
+name = "google-sheets-dashboard"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+# Environment variables
+[env.production.vars]
+GOOGLE_SHEETS_API_KEY = "your-google-sheets-api-key"
+SPREADSHEET_ID = "your-spreadsheet-id"
+
+[env.development.vars]
+GOOGLE_SHEETS_API_KEY = "your-google-sheets-api-key"
+SPREADSHEET_ID = "your-spreadsheet-id"
+
+# Route configuration
+[[routes]]
+pattern = "yourdomain.com/*"
+zone_name = "yourdomain.com"
+
+# KV namespaces (optional for caching)
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-kv-namespace-id"
+preview_id = "your-kv-namespace-preview-id"
+
+# Durability settings
+[durable_objects]
+# Add durable objects if needed
+
+# R2 bucket bindings (optional for file storage)
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "your-r2-bucket"
+
+# Compatibility flags
+compatibility_flags = ["nodejs_compat"]
+
+# Resource limits
+[placement]
+mode = "smart"
+
+# Security settings
+[security]
+# Add security configurations if needed
+
+# Build configuration
+[build]
+command = ""
+cwd = ""
+watch_dir = ""
+
+# Triggers (optional for scheduled tasks)
+[[triggers]]
+cron = "0 */5 * * *"  # Run every 5 minutes
+target = "scheduled"
+
+# Analytics (optional)
+[analytics_engine_bindings]
+# Add analytics bindings if needed
+
+# Queue bindings (optional for background tasks)
+[[queues]]
+binding = "TASKS"
+queue_name = "background-tasks"
+
+# Tail workers (optional for logging)
+[[tail_workers]]
+service = "log-worker"
+environment = "production"

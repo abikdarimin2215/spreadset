@@ -1,0 +1,114 @@
+[20:50:17] 📦 Processed dependencies!
+
+
+
+
+2025-07-18 20:50:25.410 Uncaught app execution
+
+Traceback (most recent call last):
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+
+    result = func()
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+
+    exec(code, module.__dict__)  # noqa: S102
+
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/mount/src/spreadsets/streamlit_app.py", line 565, in <module>
+
+    demo_data = get_demo_data()
+
+                ^^^^^^^^^^^^^
+
+NameError: name 'get_demo_data' is not defined
+
+2025-07-18 20:50:46.514 Uncaught app execution
+
+Traceback (most recent call last):
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+
+    result = func()
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+
+    exec(code, module.__dict__)  # noqa: S102
+
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/mount/src/spreadsets/streamlit_app.py", line 565, in <module>
+
+    demo_data = get_demo_data()
+
+                ^^^^^^^^^^^^^
+
+NameError: name 'get_demo_data' is not defined
+
+2025-07-18 20:50:53.470 Uncaught app execution
+
+Traceback (most recent call last):
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+
+    result = func()
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+
+    exec(code, module.__dict__)  # noqa: S102
+
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/mount/src/spreadsets/streamlit_app.py", line 565, in <module>
+
+    demo_data = get_demo_data()
+
+                ^^^^^^^^^^^^^
+
+NameError: name 'get_demo_data' is not defined
+
+2025-07-18 20:50:58.453 Uncaught app execution
+
+Traceback (most recent call last):
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+
+    result = func()
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+
+    exec(code, module.__dict__)  # noqa: S102
+
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/mount/src/spreadsets/streamlit_app.py", line 565, in <module>
+
+    demo_data = get_demo_data()
+
+                ^^^^^^^^^^^^^
+
+NameError: name 'get_demo_data' is not defined
+
+2025-07-18 20:50:58.685 Uncaught app execution
+
+Traceback (most recent call last):
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+
+    result = func()
+
+  File "/home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+
+    exec(code, module.__dict__)  # noqa: S102
+
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/mount/src/spreadsets/streamlit_app.py", line 565, in <module>
+
+    demo_data = get_demo_data()
+
+                ^^^^^^^^^^^^^
+
+NameError: name 'get_demo_data' is not defined

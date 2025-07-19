@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{blog_title}}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f8ff; }
+        .header { background: #4169e1; color: white; padding: 2rem; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .post { background: white; margin: 1rem 0; padding: 1rem; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{blog_title}}</h1>
+        <p>{{blog_description}}</p>
+    </div>
+    <div class="container">
+        <div id="posts">Loading posts...</div>
+    </div>
+    
+    <script>
+        async function loadPosts() {
+            try {
+                const response = await fetch('/api/posts');
+                const data = await response.json();
+                
+                if (data.success && data.posts) {
+                    const postsContainer = document.getElementById('posts');
+                    const posts = data.posts;
+                    
+                    postsContainer.innerHTML = posts.map(post => `
+                        <div class="post">
+                            <h3>${post.title}</h3>
+                            <p>${(post.content || '').substring(0, 200)}...</p>
+                            <small>Category: ${post.category || 'Uncategorized'} | Date: ${post.date}</small>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                document.getElementById('posts').innerHTML = 'Failed to load posts: ' + error.message;
+            }
+        }
+        
+        loadPosts();
+    </script>
+</body>
+</html>

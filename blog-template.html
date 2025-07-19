@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{site_title}} - Blog</title>
+    <meta name="description" content="{{site_description}}">
+    <meta name="keywords" content="{{site_keywords}}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --blog-bg: #ffffff;
+            --blog-text: #374151;
+            --blog-accent: #3b82f6;
+        }
+
+        body {
+            background: var(--light-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--blog-text);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .blog-card {
+            background: var(--blog-bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .blog-card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .blog-card-body {
+            padding: 1.5rem;
+        }
+
+        .blog-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .blog-card-title:hover {
+            color: var(--blog-accent);
+            text-decoration: none;
+        }
+
+        .blog-card-meta {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .blog-card-excerpt {
+            color: var(--blog-text);
+            margin-bottom: 1rem;
+        }
+
+        .blog-card-category {
+            display: inline-block;
+            background: var(--blog-accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            margin-bottom: 1rem;
+        }
+
+        .blog-card-category:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .sidebar {
+            background: var(--blog-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .sidebar h5 {
+            color: var(--dark-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--blog-accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar ul li a {
+            color: var(--blog-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            color: var(--blog-accent);
+        }
+
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 3rem 0;
+        }
+
+        .search-box {
+            background: var(--blog-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box input {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            width: 100%;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--blog-accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--secondary-color);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-section p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-blog me-2"></i>
+                {{site_title}}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1>{{site_title}}</h1>
+            <p>{{site_description}}</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Blog Content -->
+            <div class="col-lg-8">
+                <!-- Search Box -->
+                <div class="search-box">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Cari artikel..." id="searchInput">
+                        <button class="btn btn-primary" type="button" onclick="searchPosts()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Blog Posts -->
+                <div id="blogPosts" class="row">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p>Memuat artikel...</p>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-wrapper">
+                    <nav aria-label="Blog pagination">
+                        <ul class="pagination" id="pagination">
+                            <!-- Pagination akan di-generate oleh JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Recent Posts -->
+                <div class="sidebar">
+                    <h5><i class="fas fa-clock me-2"></i>Artikel Terbaru</h5>
+                    <ul id="recentPosts">
+                        <li>Memuat...</li>
+                    </ul>
+                </div>
+
+                <!-- Categories -->
+                <div class="sidebar">
+                    <h5><i class="fas fa-folder me-2"></i>Kategori</h5>
+                    <ul id="categories">
+                        <li>Memuat...</li>
+                    </ul>
+                </div>
+
+                <!-- Tags -->
+                <div class="sidebar">
+                    <h5><i class="fas fa-tags me-2"></i>Tag</h5>
+                    <div id="tags">
+                        Memuat...
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="sidebar">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Statistik</h5>
+                    <ul id="statistics">
+                        <li>Total Artikel: <span id="totalPosts">0</span></li>
+                        <li>Total Kategori: <span id="totalCategories">0</span></li>
+                        <li>Total Tag: <span id="totalTags">0</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>{{site_title}}</h5>
+                    <p>{{site_description}}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Kontak</h5>
+                    <p>
+                        <i class="fas fa-envelope me-2"></i>
+                        Email: info@example.com
+                    </p>
+                    <p>
+                        <i class="fas fa-phone me-2"></i>
+                        Telepon: +62 123 456 7890
+                    </p>
+                </div>
+            </div>
+            <hr class="mt-4">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p>&copy; {{current_year}} {{site_title}}. Semua hak dilindungi undang-undang.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Konfigurasi API
+        const API_CONFIG = {
+            baseURL: window.location.origin,
+            endpoints: {
+                posts: '/api/posts',
+                categories: '/api/categories',
+                tags: '/api/tags',
+                stats: '/api/stats'
+            }
+        };
+
+        // State management
+        let currentPage = 1;
+        let postsPerPage = 6;
+        let allPosts = [];
+        let filteredPosts = [];
+        let searchQuery = '';
+
+        // Inisialisasi aplikasi
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inisialisasi aplikasi...');
+            loadBlogData();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                searchQuery = e.target.value.toLowerCase();
+                filterPosts();
+            });
+
+            // Enter key untuk search
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchPosts();
+                }
+            });
+        }
+
+        // Load blog data from API
+        async function loadBlogData() {
+            try {
+                const response = await fetch(API_CONFIG.endpoints.posts);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allPosts = data.posts || [];
+                    filteredPosts = [...allPosts];
+                    
+                    console.log('Data berhasil dimuat:', allPosts.length, 'rows');
+                    
+                    renderPosts();
+                    loadSidebarData();
+                } else {
+                    showError('Gagal memuat data: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error loading blog data:', error);
+                showError('Terjadi kesalahan saat memuat data blog');
+            }
+        }
+
+        // Filter posts based on search query
+        function filterPosts() {
+            if (!searchQuery) {
+                filteredPosts = [...allPosts];
+            } else {
+                filteredPosts = allPosts.filter(post => 
+                    post.title.toLowerCase().includes(searchQuery) ||
+                    post.content.toLowerCase().includes(searchQuery) ||
+                    post.category.toLowerCase().includes(searchQuery) ||
+                    post.tags.toLowerCase().includes(searchQuery)
+                );
+            }
+            
+            currentPage = 1;
+            renderPosts();
+        }
+
+        // Search posts function
+        function searchPosts() {
+            const searchInput = document.getElementById('searchInput');
+            searchQuery = searchInput.value.toLowerCase();
+            filterPosts();
+        }
+
+        // Render blog posts
+        function renderPosts() {
+            const container = document.getElementById('blogPosts');
+            const startIndex = (currentPage - 1) * postsPerPage;
+            const endIndex = startIndex + postsPerPage;
+            const postsToShow = filteredPosts.slice(startIndex, endIndex);
+
+            if (postsToShow.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4>Tidak ada artikel ditemukan</h4>
+                            <p class="text-muted">Coba gunakan kata kunci yang berbeda</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = postsToShow.map(post => `
+                <div class="col-md-6 mb-4">
+                    <div class="blog-card">
+                        <div class="blog-card-image">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div class="blog-card-body">
+                            <a href="/post/${post.slug || post.id}" class="blog-card-category">
+                                ${post.category || 'Uncategorized'}
+                            </a>
+                            <h3 class="blog-card-title">
+                                <a href="/post/${post.slug || post.id}">${post.title}</a>
+                            </h3>
+                            <div class="blog-card-meta">
+                                <i class="fas fa-calendar me-1"></i>
+                                ${formatDate(post.date)}
+                                <i class="fas fa-user ms-3 me-1"></i>
+                                ${post.author || 'Admin'}
+                            </div>
+                            <p class="blog-card-excerpt">
+                                ${truncateText(post.content, 150)}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="/post/${post.slug || post.id}" class="btn btn-primary btn-sm">
+                                    Baca Selengkapnya
+                                </a>
+                                <div class="text-muted small">
+                                    <i class="fas fa-tags me-1"></i>
+                                    ${post.tags || 'No tags'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            renderPagination();
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+            const paginationContainer = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            if (currentPage > 1) {
+                paginationHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                `;
+            }
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `
+                        <li class="page-item active">
+                            <span class="page-link">${i}</span>
+                        </li>
+                    `;
+                } else {
+                    paginationHTML += `
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                        </li>
+                    `;
+                }
+            }
+
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                `;
+            }
+
+            paginationContainer.innerHTML = paginationHTML;
+        }
+
+        // Change page function
+        function changePage(page) {
+            currentPage = page;
+            renderPosts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Load sidebar data
+        function loadSidebarData() {
+            loadRecentPosts();
+            loadCategories();
+            loadTags();
+            loadStatistics();
+        }
+
+        // Load recent posts for sidebar
+        function loadRecentPosts() {
+            const recentPosts = allPosts.slice(0, 5);
+            const container = document.getElementById('recentPosts');
+            
+            if (recentPosts.length === 0) {
+                container.innerHTML = '<li>Tidak ada artikel</li>';
+                return;
+            }
+
+            container.innerHTML = recentPosts.map(post => `
+                <li>
+                    <a href="/post/${post.slug || post.id}">
+                        ${post.title}
+                    </a>
+                    <small class="text-muted d-block">
+                        ${formatDate(post.date)}
+                    </small>
+                </li>
+            `).join('');
+        }
+
+        // Load categories for sidebar
+        function loadCategories() {
+            const categories = {};
+            allPosts.forEach(post => {
+                const category = post.category || 'Uncategorized';
+                categories[category] = (categories[category] || 0) + 1;
+            });
+
+            const container = document.getElementById('categories');
+            const categoryList = Object.entries(categories)
+                .sort(([,a], [,b]) => b - a)
+                .map(([category, count]) => `
+                    <li>
+                        <a href="/category/${encodeURIComponent(category)}">
+                            ${category} (${count})
+                        </a>
+                    </li>
+                `).join('');
+
+            container.innerHTML = categoryList || '<li>Tidak ada kategori</li>';
+        }
+
+        // Load tags for sidebar
+        function loadTags() {
+            const tags = {};
+            allPosts.forEach(post => {
+                const postTags = post.tags ? post.tags.split(',').map(tag => tag.trim()) : [];
+                postTags.forEach(tag => {
+                    if (tag) {
+                        tags[tag] = (tags[tag] || 0) + 1;
+                    }
+                });
+            });
+
+            const container = document.getElementById('tags');
+            const tagList = Object.entries(tags)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10)
+                .map(([tag, count]) => `
+                    <a href="/tag/${encodeURIComponent(tag)}" class="badge bg-secondary me-1 mb-1">
+                        ${tag} (${count})
+                    </a>
+                `).join('');
+
+            container.innerHTML = tagList || 'Tidak ada tag';
+        }
+
+        // Load statistics for sidebar
+        function loadStatistics() {
+            const categories = new Set(allPosts.map(post => post.category || 'Uncategorized'));
+            const tags = new Set();
+            
+            allPosts.forEach(post => {
+                const postTags = post.tags ? post.tags.split(',').map(tag => tag.trim()) : [];
+                postTags.forEach(tag => {
+                    if (tag) tags.add(tag);
+                });
+            });
+
+            document.getElementById('totalPosts').textContent = allPosts.length;
+            document.getElementById('totalCategories').textContent = categories.size;
+            document.getElementById('totalTags').textContent = tags.size;
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown date';
+            
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Invalid date';
+            
+            return date.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            if (text.length <= maxLength) return text;
+            return text.substr(0, maxLength) + '...';
+        }
+
+        function showError(message) {
+            const container = document.getElementById('blogPosts');
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${message}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Auto-refresh data every 30 seconds
+        setInterval(loadBlogData, 30000);
+    </script>
+</body>
+</html>
