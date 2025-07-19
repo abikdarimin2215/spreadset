@@ -54,6 +54,7 @@ This project has evolved from converting Google Apps Script files to creating a 
 - Cross-platform compatibility
 
 ## Recent Changes
+- **2025-07-19**: SET Node.js Web App as Default - menghapus Streamlit Dashboard, hanya menggunakan Node.js Web App
 - **2025-07-19**: INTEGRATED Node.js Web App with Streamlit - streamlit_app.py sekarang dapat menjalankan web-app.js
 - **2025-07-19**: ENHANCED Website Generation - tambah fungsi generate_website_html() untuk membuat website dari data spreadsheet
 - **2025-07-19**: ADDED Real-time Spreadsheet Integration - get_sheets_data() untuk koneksi langsung ke Google Sheets
